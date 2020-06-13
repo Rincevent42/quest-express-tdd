@@ -52,4 +52,43 @@ describe('Test routes', () => {
       });
   });
 
+  // Quête Express et TDD - Tests d'intégration de routes Express
+  describe('GET /bookmarks/:id', () => {
+    const testBookmark = { url: 'https://nodejs.org/', title: 'Node.js' };
+    beforeEach((done) => connection.query(
+      'TRUNCATE bookmark', () => connection.query(
+        'INSERT INTO bookmark SET ?', testBookmark, done
+      )
+    ));
+  
+    // Write your tests HERE!
+    it ('GET / return error 404 because id does not exist', (done) => {
+      request(app)
+        .get('/bookmarks/10000')
+        .expect(404)
+        .expect('Content-Type', /json/)
+        .then(response => {
+          const expected = { error: 'Bookmark not found' };
+          expect(response.body).toEqual(expected);
+          done();
+        });
+    })
+
+    it ('GET / return 200 with the object from the DB', (done) => {
+      request(app)
+        .get('/bookmarks/1')
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .then(response => {
+          const expected = {
+            id: 1,
+            url: testBookmark.url,
+            title: testBookmark.title
+          };
+          expect(response.body).toEqual(expected);
+          done();
+        });
+    })
+  });
+
 });

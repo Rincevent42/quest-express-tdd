@@ -38,15 +38,32 @@ app.post('/bookmarks', (req, res) => {
               url: url,
               title: title
             });
-  
         });
-
       }
-
-
     });
   }
+});
 
+app.get('/bookmarks/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+  connection.query('SELECT * FROM bookmark WHERE id = ?', id, (err, results) => {
+    if (err) {
+      res.status(500).json({
+        error: err.message,
+        sql: err.sql,
+      });
+    } else {
+      if (results[0] === undefined) {
+        // First case: wrong id number => error
+        return res.status(404).json({ error: 'Bookmark not found' }); 
+      } else {
+        // Second case: id is OK => send the data
+        const obj = { id, ...results[0] };
+        return res.status(200).send(obj);
+      }
+      
+    }
+  })
 });
 
 module.exports = app;
